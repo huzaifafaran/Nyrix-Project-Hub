@@ -20,22 +20,14 @@ NEXT_PUBLIC_SUPABASE_URL=your_supabase_url_here
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
 
 # SMTP Configuration
-SMTP_HOST=smtp.gmail.com
+SMTP_HOST=smtp.gmail.co
 SMTP_PORT=465
 SMTP_USER=your_gmail@gmail.com
 SMTP_PASS=your_app_password_here
 EMAIL_FROM=Your Name <your_gmail@gmail.com>
 ```
 
-### 3. Current Configuration
-The system is pre-configured with:
-```env
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=465
-SMTP_USER=veeko.assistant@gmail.com
-SMTP_PASS=zeka pffu xpfv axmm
-EMAIL_FROM=Veeko Reports <veeko.assistant@gmail.com>
-```
+
 
 ## 🔧 How It Works
 
