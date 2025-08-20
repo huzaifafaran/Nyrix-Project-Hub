@@ -15,13 +15,15 @@ A beautiful and efficient project management platform by Nyrix, built with Next.
 - **Task Status**: Track tasks through Todo → In Progress → Review → Completed workflow
 - **Priority Levels**: Set task priority (Low, Medium, High, Urgent)
 - **Deadlines**: Set and track task deadlines with overdue warnings
-- **Assignments**: Assign tasks to team members
+- **Assignments**: Assign tasks to predefined team members with email notifications
 - **Task Filtering**: Filter tasks by status, priority, and search terms
 
 ### 💬 Communication
 - **Comments System**: Add comments to tasks for team collaboration
+- **User Tagging**: Tag team members using @username syntax (e.g., @huzaifa, @sarim)
 - **Real-time Updates**: See comment counts and recent activity
 - **Author Tracking**: Track who made each comment with timestamps
+- **Email Notifications**: Automatic email alerts for task assignments, comments, and tags
 
 ### 🎨 Beautiful UI/UX
 - **Modern Design**: Clean, intuitive interface with smooth animations
@@ -67,7 +69,32 @@ A beautiful and efficient project management platform by Nyrix, built with Next.
 - **Styling**: Tailwind CSS
 - **Icons**: Lucide React
 - **Date Handling**: date-fns
-- **Storage**: Local Storage (easily replaceable with backend API)
+- **Storage**: Supabase (PostgreSQL)
+- **Email Service**: EmailJS for notifications
+
+## 👥 Team Members
+
+The system comes pre-configured with four team members:
+
+1. **Huzaifa** (huzaifa@nyrix.co)
+2. **Sarim** (sarim@nyrix.co)  
+3. **Talha** (talhaone1234@gmail.com)
+4. **Hashir** (muhammadhashirsiddiqui2@gmail.com)
+
+### Adding/Modifying Team Members
+Edit `lib/team-members.ts` to add, remove, or modify team members.
+
+## 📧 Email Notifications
+
+### Setup Required
+To enable email notifications, you need to:
+1. Configure SMTP environment variables (see [SMTP_SETUP.md](./SMTP_SETUP.md))
+2. Test the notification system
+
+### What Triggers Emails
+- **Task Assignment**: When a task is assigned to a team member
+- **Comment Notifications**: When someone comments on a task assigned to you
+- **Tag Notifications**: When someone tags you in a comment (special priority emails)
 
 ## 📱 Usage Guide
 
@@ -84,9 +111,10 @@ A beautiful and efficient project management platform by Nyrix, built with Next.
    - Title (required)
    - Description
    - Priority level
-   - Assignee (required)
+   - Assignee (required) - Select from predefined team members
    - Deadline (optional)
 4. Click "Create Task"
+5. The assigned team member will receive an email notification
 
 ### Managing Task Status
 1. Click the three-dot menu on any task card
@@ -96,8 +124,16 @@ A beautiful and efficient project management platform by Nyrix, built with Next.
 ### Adding Comments
 1. Click on a task to open the detail view
 2. Scroll to the comments section
-3. Enter your name and comment
-4. Click the send button
+3. Select your name from the team member dropdown
+4. Enter your comment (use @username to tag team members)
+5. Click the send button
+6. The task assignee and any tagged users will receive email notifications
+
+### Tagging Team Members
+- **Syntax**: Use `@username` in your comment (e.g., "@huzaifa please review this")
+- **Auto-complete**: Tag suggestions appear as you type
+- **Notifications**: Tagged users receive special email notifications
+- **Visual Display**: Tags are highlighted in comments with colored badges
 
 ### Filtering and Searching
 - Use the search bar to find tasks by title, description, or assignee

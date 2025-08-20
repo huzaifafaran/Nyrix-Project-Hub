@@ -179,6 +179,7 @@ export const getTasksWithComments = async (): Promise<Task[]> => {
       comments: comments?.filter(comment => comment.task_id === task.id).map(comment => ({
         ...comment,
         taskId: comment.task_id,
+        tags: comment.tags || [],
         createdAt: new Date(comment.created_at)
       })) || []
     })) || [];
@@ -249,6 +250,7 @@ export const getComments = async (): Promise<Comment[]> => {
     return data?.map(comment => ({
       ...comment,
       taskId: comment.task_id,
+      tags: comment.tags || [],
       createdAt: new Date(comment.created_at)
     })) || [];
   } catch (error) {
@@ -269,7 +271,8 @@ export const addComment = async (comment: Omit<Comment, 'id' | 'createdAt'>): Pr
       .insert({
         task_id: comment.taskId,
         author: comment.author,
-        content: comment.content
+        content: comment.content,
+        tags: comment.tags || []
       })
       .select()
       .single();
@@ -279,6 +282,7 @@ export const addComment = async (comment: Omit<Comment, 'id' | 'createdAt'>): Pr
     return {
       ...data,
       taskId: data.task_id,
+      tags: data.tags || [],
       createdAt: new Date(data.created_at)
     };
   } catch (error) {

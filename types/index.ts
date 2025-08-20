@@ -27,6 +27,7 @@ export interface Comment {
   taskId: string;
   author: string;
   content: string;
+  tags: string[]; // Array of tagged user emails
   createdAt: Date;
 }
 
@@ -47,4 +48,5 @@ export interface TaskFormData {
 export interface CommentFormData {
   content: string;
   author: string;
+  tags: string[]; // Array of tagged user emails
 }

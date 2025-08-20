@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { X, CheckSquare } from 'lucide-react';
 import { TaskFormData } from '@/types';
 import { addTask } from '@/utils/supabase-storage';
+import { TEAM_MEMBERS } from '@/lib/team-members';
+import { sendTaskAssignmentEmail } from '@/lib/email-service';
 
 interface CreateTaskModalProps {
   isOpen: boolean;
@@ -38,6 +40,25 @@ export default function CreateTaskModal({ isOpen, onClose, projectId, onTaskCrea
       };
       
       await addTask(taskData);
+      
+      // Send email notification to assigned team member
+      const assignedMember = TEAM_MEMBERS.find(member => member.email === formData.assignedTo);
+      if (assignedMember) {
+        try {
+          await sendTaskAssignmentEmail({
+            to_email: assignedMember.email,
+            to_name: assignedMember.name,
+            task_title: formData.title,
+            project_name: 'Project', // We'll need to get the actual project name
+            deadline: formData.deadline,
+            priority: formData.priority,
+            assigned_by: 'System' // We'll need to get the actual user who created the task
+          });
+        } catch (emailError) {
+          console.warn('Failed to send email notification:', emailError);
+        }
+      }
+      
       setFormData({
         title: '',
         description: '',
@@ -63,26 +84,26 @@ export default function CreateTaskModal({ isOpen, onClose, projectId, onTaskCrea
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3 sm:p-4">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-sm sm:max-w-md max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-r from-primary-600 to-primary-700 rounded-lg flex items-center justify-center">
-              <CheckSquare className="w-5 h-5 text-white" />
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-primary-600 to-primary-700 rounded-lg flex items-center justify-center">
+              <CheckSquare className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
-            <h2 className="text-xl font-semibold text-gray-900">Create New Task</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Create New Task</h2>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-gray-600 transition-colors p-1"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
           {/* Task Title */}
           <div>
             <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
@@ -114,38 +135,46 @@ export default function CreateTaskModal({ isOpen, onClose, projectId, onTaskCrea
             />
           </div>
 
-          {/* Priority */}
-          <div>
-            <label htmlFor="priority" className="block text-sm font-medium text-gray-700 mb-2">
-              Priority
-            </label>
-            <select
-              id="priority"
-              value={formData.priority}
-              onChange={(e) => handleInputChange('priority', e.target.value as any)}
-              className="input-field"
-            >
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-              <option value="urgent">Urgent</option>
-            </select>
-          </div>
+          {/* Priority and Assigned To */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Priority */}
+            <div>
+              <label htmlFor="priority" className="block text-sm font-medium text-gray-700 mb-2">
+                Priority
+              </label>
+              <select
+                id="priority"
+                value={formData.priority}
+                onChange={(e) => handleInputChange('priority', e.target.value)}
+                className="input-field"
+              >
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+                <option value="urgent">Urgent</option>
+              </select>
+            </div>
 
-          {/* Assigned To */}
-          <div>
-            <label htmlFor="assignedTo" className="block text-sm font-medium text-gray-700 mb-2">
-              Assigned To *
-            </label>
-            <input
-              type="text"
-              id="assignedTo"
-              value={formData.assignedTo}
-              onChange={(e) => handleInputChange('assignedTo', e.target.value)}
-              className="input-field"
-              placeholder="Enter assignee name"
-              required
-            />
+            {/* Assigned To */}
+            <div>
+              <label htmlFor="assignedTo" className="block text-sm font-medium text-gray-700 mb-2">
+                Assign To *
+              </label>
+              <select
+                id="assignedTo"
+                value={formData.assignedTo}
+                onChange={(e) => handleInputChange('assignedTo', e.target.value)}
+                className="input-field"
+                required
+              >
+                <option value="">Select team member</option>
+                {TEAM_MEMBERS.map((member) => (
+                  <option key={member.id} value={member.email}>
+                    {member.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {/* Deadline */}
@@ -161,25 +190,21 @@ export default function CreateTaskModal({ isOpen, onClose, projectId, onTaskCrea
               className="input-field"
               min={getMinDate()}
             />
-            <p className="text-xs text-gray-500 mt-1">
-              Leave empty if no deadline is set
-            </p>
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center justify-end space-x-3 pt-4">
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
             <button
               type="button"
               onClick={onClose}
-              className="btn-secondary"
-              disabled={isSubmitting}
+              className="btn-secondary flex-1 sm:flex-none order-2 sm:order-1"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="btn-primary"
               disabled={isSubmitting || !formData.title.trim() || !formData.assignedTo.trim()}
+              className="btn-primary flex-1 sm:flex-none order-1 sm:order-2"
             >
               {isSubmitting ? 'Creating...' : 'Create Task'}
             </button>

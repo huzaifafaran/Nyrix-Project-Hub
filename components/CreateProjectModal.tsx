@@ -42,26 +42,26 @@ export default function CreateProjectModal({ isOpen, onClose, onProjectCreated }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3 sm:p-4">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-sm sm:max-w-md max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-r from-primary-600 to-primary-700 rounded-lg flex items-center justify-center">
-              <FolderOpen className="w-5 h-5 text-white" />
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-primary-600 to-primary-700 rounded-lg flex items-center justify-center">
+              <FolderOpen className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
-            <h2 className="text-xl font-semibold text-gray-900">Create New Project</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Create New Project</h2>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-gray-600 transition-colors p-1"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
           {/* Project Name */}
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
@@ -101,7 +101,7 @@ export default function CreateProjectModal({ isOpen, onClose, onProjectCreated }
             <select
               id="status"
               value={formData.status}
-              onChange={(e) => handleInputChange('status', e.target.value as any)}
+              onChange={(e) => handleInputChange('status', e.target.value)}
               className="input-field"
             >
               <option value="active">Active</option>
@@ -110,20 +110,19 @@ export default function CreateProjectModal({ isOpen, onClose, onProjectCreated }
             </select>
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center justify-end space-x-3 pt-4">
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
             <button
               type="button"
               onClick={onClose}
-              className="btn-secondary"
-              disabled={isSubmitting}
+              className="btn-secondary flex-1 sm:flex-none order-2 sm:order-1"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="btn-primary"
               disabled={isSubmitting || !formData.name.trim()}
+              className="btn-primary flex-1 sm:flex-none order-1 sm:order-2"
             >
               {isSubmitting ? 'Creating...' : 'Create Project'}
             </button>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Filter, Search } from 'lucide-react';
+import { ArrowLeft, Plus, Filter, Search, X } from 'lucide-react';
 import { Project, Task } from '@/types';
 import { getTasksWithComments, updateTask, deleteTask } from '@/utils/supabase-storage';
 import { formatDate, formatRelativeDate, getPriorityColor, getStatusColor } from '@/utils/helpers';
@@ -21,6 +21,7 @@ export default function TaskList({ project, onBack, onTaskUpdate }: TaskListProp
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
   useEffect(() => {
     loadTasks();
@@ -49,7 +50,7 @@ export default function TaskList({ project, onBack, onTaskUpdate }: TaskListProp
       filtered = filtered.filter(task =>
         task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         task.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        task.assignedTo.toLowerCase().includes(searchTerm.toLowerCase())
+        (task.assignedTo && task.assignedTo.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
 
@@ -99,7 +100,7 @@ export default function TaskList({ project, onBack, onTaskUpdate }: TaskListProp
 
   const handleStatusChange = async (taskId: string, newStatus: string) => {
     try {
-      const updated = await updateTask(taskId, { status: newStatus as any });
+      const updated = await updateTask(taskId, { status: newStatus as 'todo' | 'in-progress' | 'review' | 'completed' });
       if (updated) {
         await loadTasks();
         onTaskUpdate();
@@ -109,200 +110,206 @@ export default function TaskList({ project, onBack, onTaskUpdate }: TaskListProp
     }
   };
 
-  const getStatusCount = (status: string) => {
-    return tasks.filter(task => task.status === status).length;
+  const clearFilters = () => {
+    setSearchTerm('');
+    setStatusFilter('all');
+    setPriorityFilter('all');
   };
 
-  const getPriorityCount = (priority: string) => {
-    return tasks.filter(task => task.priority === priority).length;
-  };
+  const hasActiveFilters = searchTerm || statusFilter !== 'all' || priorityFilter !== 'all';
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-6">
-            <div className="flex items-center space-x-4">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
+          <div className="flex items-center justify-between py-4 sm:py-6">
+            <div className="flex items-center space-x-3 sm:space-x-4">
               <button
                 onClick={onBack}
-                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                className="p-2 text-gray-600 hover:text-gray-900 transition-colors"
               >
                 <ArrowLeft className="w-5 h-5" />
               </button>
-                             <div>
-                 <h1 className="text-2xl font-bold text-gray-900">{project.name}</h1>
-                 <p className="text-sm text-gray-500">{project.description}</p>
-               </div>
+              <div>
+                <h1 className="text-lg sm:text-xl font-bold text-gray-900">{project.name}</h1>
+                <p className="text-xs sm:text-sm text-gray-500">{project.description}</p>
+              </div>
             </div>
             <button
               onClick={() => setIsCreateModalOpen(true)}
-              className="btn-primary flex items-center space-x-2"
+              className="btn-primary flex items-center space-x-2 text-sm sm:text-base px-3 sm:px-4 py-2"
             >
               <Plus className="w-4 h-4" />
-              <span>Add Task</span>
+              <span className="hidden sm:inline">New Task</span>
+              <span className="sm:hidden">New</span>
             </button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Filters and Search */}
-        <div className="mb-8 space-y-4">
-          {/* Search */}
+      <main className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6">
+        {/* Search and Filters */}
+        <div className="mb-6 space-y-3 sm:space-y-4">
+          {/* Search Bar */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
               placeholder="Search tasks..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="input-field pl-10"
+              className="w-full pl-10 pr-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             />
           </div>
 
-          {/* Filter Tabs */}
-          <div className="space-y-4">
-            {/* Status Filters */}
-            <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-              <div className="flex items-center space-x-2">
-                <span className="text-sm font-semibold text-gray-800 uppercase tracking-wide">Status:</span>
-                <button
-                  onClick={() => setStatusFilter('all')}
-                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                    statusFilter === 'all'
-                      ? 'bg-primary-100 text-primary-800 border border-primary-200'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                >
-                  All ({tasks.length})
-                </button>
-                <button
-                  onClick={() => setStatusFilter('todo')}
-                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                    statusFilter === 'todo'
-                      ? 'bg-gray-100 text-gray-800 border border-gray-200'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                >
-                  Todo ({getStatusCount('todo')})
-                </button>
-                <button
-                  onClick={() => setStatusFilter('in-progress')}
-                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                    statusFilter === 'in-progress'
-                      ? 'bg-blue-100 text-blue-800 border border-blue-200'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                >
-                  In Progress ({getStatusCount('in-progress')})
-                </button>
-                <button
-                  onClick={() => setStatusFilter('review')}
-                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                    statusFilter === 'review'
-                      ? 'bg-purple-100 text-purple-800 border border-purple-200'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                >
-                  Review ({getStatusCount('review')})
-                </button>
-                <button
-                  onClick={() => setStatusFilter('completed')}
-                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                    statusFilter === 'completed'
-                      ? 'bg-green-100 text-green-800 border border-green-200'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                >
-                  Completed ({getStatusCount('completed')})
-                </button>
-              </div>
-            </div>
-
-            {/* Priority Filters */}
-            <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-              <div className="flex items-center space-x-2">
-                <span className="text-sm font-semibold text-gray-800 uppercase tracking-wide">Priority:</span>
-                <button
-                  onClick={() => setPriorityFilter('all')}
-                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                    priorityFilter === 'all'
-                      ? 'bg-primary-100 text-primary-800 border border-primary-200'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                >
-                  All
-                </button>
-                <button
-                  onClick={() => setPriorityFilter('urgent')}
-                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                    priorityFilter === 'urgent'
-                      ? 'bg-red-100 text-red-800 border border-red-200'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                >
-                  Urgent ({getPriorityCount('urgent')})
-                </button>
-                <button
-                  onClick={() => setPriorityFilter('high')}
-                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                    priorityFilter === 'high'
-                      ? 'bg-orange-100 text-orange-800 border border-orange-200'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                >
-                  High ({getPriorityCount('high')})
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Tasks Grid */}
-        {filteredTasks.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Filter className="w-8 h-8 text-gray-400" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No tasks found</h3>
-            <p className="text-gray-500 mb-6">
-              {searchTerm || statusFilter !== 'all' || priorityFilter !== 'all'
-                ? 'Try adjusting your filters or search terms'
-                : 'Get started by creating your first task'}
-            </p>
-            {!searchTerm && statusFilter === 'all' && priorityFilter === 'all' && (
+          {/* Filter Toggle and Active Filters */}
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+              className="flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              <Filter className="w-4 h-4" />
+              <span>Filters</span>
+            </button>
+            
+            {hasActiveFilters && (
               <button
-                onClick={() => setIsCreateModalOpen(true)}
-                className="btn-primary"
+                onClick={clearFilters}
+                className="text-xs text-primary-600 hover:text-primary-700 transition-colors"
               >
-                Create Task
+                Clear all
               </button>
             )}
           </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {filteredTasks.map((task) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                onStatusChange={handleStatusChange}
-                onEdit={() => setSelectedTask(task)}
-                onDelete={() => handleTaskDeleted(task.id)}
-              />
-            ))}
-          </div>
-        )}
+
+          {/* Filters Panel */}
+          {isFiltersOpen && (
+            <div className="bg-white p-4 rounded-lg border border-gray-200 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Status Filter */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-2">Status</label>
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+                  >
+                    <option value="all">All Statuses</option>
+                    <option value="todo">Todo</option>
+                    <option value="in-progress">In Progress</option>
+                    <option value="review">Review</option>
+                    <option value="completed">Completed</option>
+                  </select>
+                </div>
+
+                {/* Priority Filter */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-2">Priority</label>
+                  <select
+                    value={priorityFilter}
+                    onChange={(e) => setPriorityFilter(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+                  >
+                    <option value="all">All Priorities</option>
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                    <option value="urgent">Urgent</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Active Filters Display */}
+          {hasActiveFilters && (
+            <div className="flex flex-wrap gap-2">
+              {searchTerm && (
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                  Search: {searchTerm}
+                  <button
+                    onClick={() => setSearchTerm('')}
+                    className="ml-1 text-blue-600 hover:text-blue-800"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              {statusFilter !== 'all' && (
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
+                  Status: {statusFilter}
+                  <button
+                    onClick={() => setStatusFilter('all')}
+                    className="ml-1 text-green-600 hover:text-green-800"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              {priorityFilter !== 'all' && (
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-purple-100 text-purple-800">
+                  Priority: {priorityFilter}
+                  <button
+                    onClick={() => setPriorityFilter('all')}
+                    className="ml-1 text-purple-600 hover:text-purple-800"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Tasks List */}
+        <div className="space-y-4 sm:space-y-6">
+          {filteredTasks.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Plus className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No tasks found</h3>
+              <p className="text-gray-500 mb-4">
+                {hasActiveFilters 
+                  ? 'Try adjusting your filters or search terms'
+                  : 'Get started by creating your first task'
+                }
+              </p>
+              {!hasActiveFilters && (
+                <button
+                  onClick={() => setIsCreateModalOpen(true)}
+                  className="btn-primary"
+                >
+                  Create Task
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              {filteredTasks.map((task) => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  onStatusChange={handleStatusChange}
+                  onEdit={() => setSelectedTask(task)}
+                  onDelete={() => handleTaskDeleted(task.id)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </main>
 
-      {/* Modals */}
+      {/* Create Task Modal */}
       <CreateTaskModal
         isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
         projectId={project.id}
+        onClose={() => setIsCreateModalOpen(false)}
         onTaskCreated={handleTaskCreated}
       />
 
+      {/* Task Detail Modal */}
       <TaskDetailModal
         isOpen={!!selectedTask}
         task={selectedTask}

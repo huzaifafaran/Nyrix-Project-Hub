@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS comments (
   task_id UUID REFERENCES tasks(id) ON DELETE CASCADE,
   author VARCHAR(255) NOT NULL,
   content TEXT NOT NULL,
+  tags TEXT[] DEFAULT '{}', -- Array of tagged user emails
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

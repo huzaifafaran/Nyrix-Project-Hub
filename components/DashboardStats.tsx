@@ -1,6 +1,5 @@
 import { Project, Task } from '@/types';
-import { CheckCircle, Clock, AlertTriangle, TrendingUp } from 'lucide-react';
-import { isOverdue } from '@/utils/helpers';
+import { FolderOpen, CheckCircle, Clock, Users, TrendingUp } from 'lucide-react';
 
 interface DashboardStatsProps {
   projects: Project[];
@@ -9,9 +8,8 @@ interface DashboardStatsProps {
 
 export default function DashboardStats({ projects, tasks }: DashboardStatsProps) {
   const completedTasks = tasks.filter(task => task.status === 'completed').length;
-  const inProgressTasks = tasks.filter(task => task.status === 'in-progress').length;
   const overdueTasks = tasks.filter(task => 
-    task.deadline && isOverdue(task.deadline) && task.status !== 'completed'
+    task.deadline && new Date(task.deadline) < new Date() && task.status !== 'completed'
   ).length;
   const activeProjects = projects.filter(project => project.status === 'active').length;
 
@@ -19,51 +17,51 @@ export default function DashboardStats({ projects, tasks }: DashboardStatsProps)
     {
       label: 'Total Projects',
       value: projects.length,
-      icon: TrendingUp,
+      icon: FolderOpen,
       color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
+      bgColor: 'bg-blue-100',
     },
     {
       label: 'Active Projects',
       value: activeProjects,
       icon: TrendingUp,
       color: 'text-green-600',
-      bgColor: 'bg-green-50',
+      bgColor: 'bg-green-100',
+    },
+    {
+      label: 'Total Tasks',
+      value: tasks.length,
+      icon: Users,
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-100',
     },
     {
       label: 'Completed Tasks',
       value: completedTasks,
       icon: CheckCircle,
       color: 'text-green-600',
-      bgColor: 'bg-green-50',
-    },
-    {
-      label: 'In Progress',
-      value: inProgressTasks,
-      icon: Clock,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
+      bgColor: 'bg-green-100',
     },
     {
       label: 'Overdue Tasks',
       value: overdueTasks,
-      icon: AlertTriangle,
+      icon: Clock,
       color: 'text-red-600',
-      bgColor: 'bg-red-50',
+      bgColor: 'bg-red-100',
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-6">
       {stats.map((stat, index) => (
-        <div key={index} className="card">
+        <div key={index} className="card p-3 sm:p-4 lg:p-6">
           <div className="flex items-center">
-            <div className={`p-2 rounded-lg ${stat.bgColor}`}>
-              <stat.icon className={`w-5 h-5 ${stat.color}`} />
+            <div className={`p-2 rounded-lg ${stat.bgColor} flex-shrink-0`}>
+              <stat.icon className={`w-4 h-4 sm:w-5 sm:h-5 ${stat.color}`} />
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">{stat.label}</p>
-              <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+            <div className="ml-2 sm:ml-4 min-w-0 flex-1">
+              <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">{stat.label}</p>
+              <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{stat.value}</p>
             </div>
           </div>
         </div>
