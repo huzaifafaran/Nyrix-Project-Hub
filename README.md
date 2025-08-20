@@ -1,0 +1,203 @@
+# Nyrix Project Hub
+
+A beautiful and efficient project management platform by Nyrix, built with Next.js, featuring modern UI/UX design and comprehensive task management capabilities.
+
+## ✨ Features
+
+### 🎯 Project Management
+- **Create Projects**: Add new projects with names, descriptions, and status
+- **Project Status**: Track projects as Active, On Hold, or Completed
+- **Visual Progress**: See project completion progress with visual indicators
+- **Project Dashboard**: Overview of all projects with key metrics
+
+### 📋 Task Management
+- **Create Tasks**: Add tasks within projects with detailed information
+- **Task Status**: Track tasks through Todo → In Progress → Review → Completed workflow
+- **Priority Levels**: Set task priority (Low, Medium, High, Urgent)
+- **Deadlines**: Set and track task deadlines with overdue warnings
+- **Assignments**: Assign tasks to team members
+- **Task Filtering**: Filter tasks by status, priority, and search terms
+
+### 💬 Communication
+- **Comments System**: Add comments to tasks for team collaboration
+- **Real-time Updates**: See comment counts and recent activity
+- **Author Tracking**: Track who made each comment with timestamps
+
+### 🎨 Beautiful UI/UX
+- **Modern Design**: Clean, intuitive interface with smooth animations
+- **Responsive Layout**: Works perfectly on desktop, tablet, and mobile
+- **Color-coded System**: Visual indicators for priorities, statuses, and deadlines
+- **Interactive Elements**: Hover effects, smooth transitions, and intuitive navigation
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd nyrix-project-hub
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
+
+3. **Run the development server**
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   ```
+
+4. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+## 🛠️ Tech Stack
+
+- **Framework**: Next.js 14 with App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Icons**: Lucide React
+- **Date Handling**: date-fns
+- **Storage**: Local Storage (easily replaceable with backend API)
+
+## 📱 Usage Guide
+
+### Creating a Project
+1. Click the "New Project" button on the dashboard
+2. Fill in the project name (required) and description
+3. Select the project status
+4. Click "Create Project"
+
+### Adding Tasks
+1. Click on a project to view its tasks
+2. Click "Add Task" button
+3. Fill in task details:
+   - Title (required)
+   - Description
+   - Priority level
+   - Assignee (required)
+   - Deadline (optional)
+4. Click "Create Task"
+
+### Managing Task Status
+1. Click the three-dot menu on any task card
+2. Select "Change Status" to update task progress
+3. Choose from: Todo, In Progress, Review, or Completed
+
+### Adding Comments
+1. Click on a task to open the detail view
+2. Scroll to the comments section
+3. Enter your name and comment
+4. Click the send button
+
+### Filtering and Searching
+- Use the search bar to find tasks by title, description, or assignee
+- Filter tasks by status using the status tabs
+- Filter by priority level
+- See real-time counts for each filter option
+
+## 🎨 Customization
+
+### Colors and Themes
+The application uses a consistent color system that can be easily customized in `tailwind.config.js`:
+
+```javascript
+colors: {
+  primary: {
+    50: '#eff6ff',
+    100: '#dbeafe',
+    // ... more shades
+  }
+}
+```
+
+### Adding New Features
+The modular component structure makes it easy to add new features:
+- New components can be added to the `components/` directory
+- Types can be extended in `types/index.ts`
+- Utility functions can be added to `utils/` directory
+
+## 🔧 Project Structure
+
+```
+project-management-tool/
+├── app/                    # Next.js app directory
+│   ├── globals.css        # Global styles
+│   ├── layout.tsx         # Root layout
+│   └── page.tsx           # Main dashboard page
+├── components/             # React components
+│   ├── CreateProjectModal.tsx
+│   ├── CreateTaskModal.tsx
+│   ├── DashboardStats.tsx
+│   ├── ProjectCard.tsx
+│   ├── TaskCard.tsx
+│   ├── TaskDetailModal.tsx
+│   └── TaskList.tsx
+├── types/                  # TypeScript interfaces
+│   └── index.ts
+├── utils/                  # Utility functions
+│   ├── helpers.ts         # Helper functions
+│   └── storage.ts         # Local storage management
+├── package.json
+├── tailwind.config.js
+└── README.md
+```
+
+## 🚀 Deployment
+
+### Build for Production
+```bash
+npm run build
+npm start
+```
+
+### Environment Variables
+Create a `.env.local` file for any environment-specific configuration:
+
+```env
+NEXT_PUBLIC_APP_NAME="Project Manager"
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🆘 Support
+
+If you encounter any issues or have questions:
+1. Check the existing issues in the repository
+2. Create a new issue with detailed information
+3. Include steps to reproduce the problem
+
+## 🔮 Future Enhancements
+
+- [ ] Backend API integration
+- [ ] User authentication and roles
+- [ ] File attachments for tasks
+- [ ] Email notifications
+- [ ] Team collaboration features
+- [ ] Advanced reporting and analytics
+- [ ] Mobile app
+- [ ] Dark mode theme
+- [ ] Multi-language support
+
+---
+
+Built with ❤️ using Next.js and modern web technologies.
